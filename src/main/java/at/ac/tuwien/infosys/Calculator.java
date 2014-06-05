@@ -37,6 +37,14 @@ public class Calculator implements Runnable {
                 File taskQueueFile = new File(directoryPath + "taskqueue.txt");
                 File finishedFile = new File(directoryPath + "finished.txt");
 
+                if (!taskQueueFile.exists()) {
+                    taskQueueFile.createNewFile();
+                }
+
+                if (!finishedFile.exists()) {
+                    finishedFile.createNewFile();
+                }
+
 
 
                 logger.trace("Import new invocations");
@@ -66,8 +74,8 @@ public class Calculator implements Runnable {
                 FileUtils.writeStringToFile(taskQueueFile, writeBuffer);
 
 
-                logger.trace("Invoke lookbusy with " + calculateOverallCPU() + " on " + Runtime.getRuntime().availableProcessors() + " cores");
-                Process p = Runtime.getRuntime().exec(" lookbusy -c " + calculateOverallCPU() + " -n " +  Runtime.getRuntime().availableProcessors());
+                logger.trace("Invoke lookbusy: " + " lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());
+                Process p = Runtime.getRuntime().exec(" lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  Runtime.getRuntime().availableProcessors());
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {

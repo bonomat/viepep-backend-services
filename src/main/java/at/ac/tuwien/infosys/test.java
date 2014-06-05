@@ -18,7 +18,7 @@ public class test {
     public static void main(String[] args) throws IOException {
 
 
-        System.out.println(Runtime.getRuntime().availableProcessors());
+        System.out.println(Math.round(1.111));
 
 
 

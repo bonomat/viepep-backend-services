@@ -24,17 +24,11 @@ public class Service {
     @Produces("text/plain")
     public String invokeService(@PathParam("task") int task) throws IOException, InterruptedException {
 
-
-        Task taskType = new Task(0.0, 0.0);
-
-        switch(task) {
-            case 1: taskType = new Task(5.0, 10.0); break;
-            case 2: taskType = new Task(10.0, 20.0); break;
-            case 3: taskType = new Task(25.0, 5.0); break;
-        }
-
         //TODO add filelock
         File taskQueueFile = new File(directoryPath + "taskqueue.txt");
+        if (!taskQueueFile.exists()) {
+            taskQueueFile.createNewFile();
+        }
         UUID taskId = UUID.randomUUID();
 
         FileUtils.writeStringToFile(taskQueueFile, task + ";" + taskId + "\n", true);
@@ -45,6 +39,9 @@ public class Service {
 
         while (!finished) {
             File finishedFile = new File(directoryPath + "finished.txt");
+            if (!finishedFile.exists()) {
+                finishedFile.createNewFile();
+            }
             for (String line : FileUtils.readLines(finishedFile, "UTF-8")) {
                 if (line.contains(taskId.toString())) {
                    finished = true;

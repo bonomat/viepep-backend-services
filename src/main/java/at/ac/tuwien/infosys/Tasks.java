@@ -11,9 +11,9 @@ public class Tasks {
 
 
     public Tasks() {
-        tasks.put(1, new Task(20.0, 10.0));
-        tasks.put(2, new Task(10.0, 20.0));
-        tasks.put(3, new Task(55.0, 5.0));
+        tasks.put(1, new Task(10.0, 60.0));
+        tasks.put(2, new Task(15.0, 40.0));
+        tasks.put(3, new Task(55.0, 50.0));
 
     }
 

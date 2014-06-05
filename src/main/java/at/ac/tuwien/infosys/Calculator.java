@@ -49,9 +49,13 @@ public class Calculator implements Runnable {
                     currentTask.setUUID(parts[1]);
 
                     if (isEnoughCPUavailable(currentTask)) {
-                        //TODO implement multiple cores
+
+                        //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
+                        //actual CPU = normal CP/cores
+                        Double actualCPU = currentTask.getCpu()/Runtime.getRuntime().availableProcessors();
+
                         currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
-                        currentTask.setActualCPU(getNormalDistribution(currentTask.getCpu()));
+                        currentTask.setActualCPU(getNormalDistribution(actualCPU));
 
                         runningTasks.add(currentTask);
                     } else {
@@ -62,13 +66,8 @@ public class Calculator implements Runnable {
                 FileUtils.writeStringToFile(taskQueueFile, writeBuffer);
 
 
-                //TODO invoke lookbusy
-
-                calculateOverallCPU();
-
-
-                logger.trace("Invoke lookbusy with " + calculateOverallCPU() + " on TODO cores");
-                Process p = Runtime.getRuntime().exec(" ping www.google.com");
+                logger.trace("Invoke lookbusy with " + calculateOverallCPU() + " on " + Runtime.getRuntime().availableProcessors() + " cores");
+                Process p = Runtime.getRuntime().exec(" lookbusy -c " + calculateOverallCPU() + " -n " +  Runtime.getRuntime().availableProcessors());
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -109,7 +108,8 @@ public class Calculator implements Runnable {
 
     private Boolean isEnoughCPUavailable(Task task) {
         //TODO respect multiple cores
-        if (calculateOverallCPU() + task.getCpu()>100) {
+        //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
+        if (calculateOverallCPU() + (task.getCpu()/Runtime.getRuntime().availableProcessors())>100) {
             return false;
         }
         return true;
@@ -119,7 +119,6 @@ public class Calculator implements Runnable {
     private Double calculateOverallCPU() {
         Double overallCPU = baseload;
         for (Task task : runningTasks) {
-            logger.trace(overallCPU + " - " + task.getActualCPU());
             overallCPU+=task.getActualCPU();
         }
         return overallCPU;

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class Calculator implements Runnable {
 
-    private String directoryPath = "/Users/hochi/workspace/";
+    private String directoryPath = "";
     private static final Logger logger = LogManager.getLogger(Calculator.class.getName());
     private Tasks tasks;
     private List<Task> runningTasks = new ArrayList<>();

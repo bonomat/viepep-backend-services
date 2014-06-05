@@ -17,7 +17,7 @@ import java.util.UUID;
 @Path("/service/{task}")
 public class Service {
 
-    private String directoryPath = "/Users/hochi/workspace/";
+    private String directoryPath = "";
     static final Logger logger = LogManager.getLogger(Service.class.getName());
 
     @GET

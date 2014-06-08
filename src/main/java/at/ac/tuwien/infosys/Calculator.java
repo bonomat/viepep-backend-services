@@ -61,7 +61,6 @@ public class Calculator implements Runnable {
                         //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
                         //actual CPU = normal CP/cores
                         Double actualCPU = currentTask.getCpu()/Runtime.getRuntime().availableProcessors();
-
                         currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
                         currentTask.setActualCPU(getNormalDistribution(actualCPU));
 
@@ -117,7 +116,7 @@ public class Calculator implements Runnable {
     private Boolean isEnoughCPUavailable(Task task) {
         //TODO respect multiple cores
         //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
-        if (calculateOverallCPU() + (task.getCpu()/Runtime.getRuntime().availableProcessors())>100) {
+        if ((calculateOverallCPU() + (task.getCpu()/Runtime.getRuntime().availableProcessors()))>100) {
             return false;
         }
         return true;

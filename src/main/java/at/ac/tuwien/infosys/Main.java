@@ -32,8 +32,8 @@ public class Main {
         System.out.println(String.format("Jersey app started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop it...",
                 "http://localhost:8080"));
-        System.in.read();
-        httpServer.stop();
-        calcThread.interrupt();
+       // System.in.read();
+       // httpServer.stop();
+       // calcThread.interrupt();
     }    
 }

@@ -25,6 +25,10 @@ public class Tasks {
     }
 
     public Task getTask(Integer taskId) {
-        return tasks.get(taskId);
+        if ((taskId>0) && (taskId<11)) {
+            return tasks.get(taskId);
+        } else {
+            return new Task(1.0, 1.0);
+        }
     }
 }

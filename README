@@ -1,3 +1,7 @@
+# Usage
+<IP>/service/[1-10]
+
+
 # To install:
 sudo apt-get -y install openjdk-7-jdk git maven g++ make
 

@@ -9,19 +9,19 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
-@Path("/service/{task}")
+@Path("/{task}")
 public class Service {
 
     private String directoryPath = "";
     static final Logger logger = LogManager.getLogger(Service.class.getName());
 
     @GET
-    @Produces("text/plain")
+    @Produces(MediaType.TEXT_HTML)
     public String invokeService(@PathParam("task") int task) throws IOException, InterruptedException {
 
         //TODO add filelock
@@ -44,10 +44,10 @@ public class Service {
             }
             for (String line : FileUtils.readLines(finishedFile, "UTF-8")) {
                 if (line.contains(taskId.toString())) {
-                   finished = true;
-                   String fileString = FileUtils.readFileToString(finishedFile);
-                   String finalString = fileString.replaceAll(taskId.toString(), "");
-                   FileUtils.writeStringToFile(finishedFile, finalString);
+                    finished = true;
+                    String fileString = FileUtils.readFileToString(finishedFile);
+                    String finalString = fileString.replaceAll(taskId.toString(), "");
+                    FileUtils.writeStringToFile(finishedFile, finalString);
                 }
             }
             Thread.sleep(1000);
@@ -57,4 +57,5 @@ public class Service {
 
         return "Hurray!";
     }
+
 }

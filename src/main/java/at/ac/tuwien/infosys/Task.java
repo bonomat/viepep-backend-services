@@ -1,7 +1,9 @@
 package at.ac.tuwien.infosys;
 
 
-public class Task {
+import java.io.Serializable;
+
+public class Task implements Serializable {
 
     private Double cpu;
     private Double duration;

@@ -37,6 +37,9 @@ public class Service {
 
         Boolean finished = false;
 
+
+        //TODO add countdown for while loop
+
         while (!finished) {
             File finishedFile = new File(directoryPath + "finished.txt");
             if (!finishedFile.exists()) {

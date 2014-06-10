@@ -35,12 +35,13 @@ public class Service {
         logger.trace("Trigger new Task " + task + " with ID " + taskId);
 
 
-        Boolean finished = true;
+        Integer possibleIterations = 0;
+        Boolean finished = false;
 
 
         //TODO add countdown for while loop
 
-        while (!finished) {
+        while ((possibleIterations<300) && (!finished)) {
             File finishedFile = new File(directoryPath + "finished.txt");
             if (!finishedFile.exists()) {
                 finishedFile.createNewFile();

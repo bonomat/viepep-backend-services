@@ -31,14 +31,10 @@ public class WebApplication extends Application {
      */
     @PostConstruct
     public static void initialize() {
-        Calculator calculator = new Calculator();
-        calcThread = new Thread(calculator);
-        calcThread.start();
     }
 
     @PreDestroy
-    public static void destrouy() {
-        calcThread.interrupt();
+    public static void destroy() {
     }
 
 

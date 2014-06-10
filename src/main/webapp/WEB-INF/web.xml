@@ -17,10 +17,6 @@
             <param-name>com.sun.jersey.config.property.packages</param-name>
             <param-value>at.ac.tuwien.infosys</param-value>
         </init-param>
-        <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
-            <param-value>com.myBiz.myWebApp.WebApplication</param-value>
-        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 

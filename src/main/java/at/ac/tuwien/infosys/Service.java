@@ -35,7 +35,7 @@ public class Service {
         logger.trace("Trigger new Task " + task + " with ID " + taskId);
 
 
-        Boolean finished = false;
+        Boolean finished = true;
 
         while (!finished) {
             File finishedFile = new File(directoryPath + "finished.txt");

@@ -5,13 +5,16 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.quartz.*;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Calculator implements Runnable {
+
+@PersistJobDataAfterExecution
+@DisallowConcurrentExecution
+public class Calculator implements Job {
 
     private String directoryPath = "";
     private static final Logger logger = LogManager.getLogger(Calculator.class.getName());
@@ -23,93 +26,87 @@ public class Calculator implements Runnable {
     private Double lowerBound = 0.7;
     private Double upperBound = 1.5;
 
-    public Calculator() {
-        tasks = new Tasks();
-    }
-
 
     @Override
-    public void run() {
+    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        tasks = new Tasks();
+
+        JobDataMap data = jobExecutionContext.getJobDetail().getJobDataMap();
+        if (data.get("tasks")!=null) {
+            runningTasks = (ArrayList<Task>) data.get("tasks");
+        }
+
+        //String favoriteColor = data.getString(FAVORITE_COLOR);
+
+
         logger.trace("Start calculator");
 
-        while (true) {
-            try {
-                File taskQueueFile = new File(directoryPath + "taskqueue.txt");
-                File finishedFile = new File(directoryPath + "finished.txt");
+        try {
+            File taskQueueFile = new File(directoryPath + "taskqueue.txt");
+            File finishedFile = new File(directoryPath + "finished.txt");
 
-                if (!taskQueueFile.exists()) {
-                    taskQueueFile.createNewFile();
-                }
-
-                if (!finishedFile.exists()) {
-                    finishedFile.createNewFile();
-                }
-
-
-
-                logger.trace("Import new invocations");
-
-                //Add new Tasks
-                String writeBuffer = "";
-                for (String line : FileUtils.readLines(taskQueueFile, "UTF-8")) {
-                    String[] parts = line.split(";");
-                    Task currentTask = tasks.getTask(Integer.parseInt(parts[0]));
-                    currentTask.setUUID(parts[1]);
-
-                    if (isEnoughCPUavailable(currentTask)) {
-
-                        //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
-                        //actual CPU = normal CP/cores
-                        Double actualCPU = currentTask.getCpu()/Runtime.getRuntime().availableProcessors();
-                        currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
-                        currentTask.setActualCPU(getNormalDistribution(actualCPU));
-
-                        runningTasks.add(currentTask);
-                    } else {
-                       writeBuffer+=line + "\n";
-                    }
-                }
-
-                FileUtils.writeStringToFile(taskQueueFile, writeBuffer);
-
-
-                logger.trace("Invoke lookbusy: " + " lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());
-                Process p = Runtime.getRuntime().exec(" lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  Runtime.getRuntime().availableProcessors());
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    return;
-                }
-
-                p.destroy();
-
-                logger.trace("Cleanup runningList");
-                List<Task> cleanList = new ArrayList<>();
-                for (Task task : runningTasks) {
-                    if (task.getTimeLeft()-5<0) {
-                        FileUtils.writeStringToFile(finishedFile, task.getUUID() + "\n", true);
-                    } else {
-                       task.setTimeLeft(task.getTimeLeft()-5);
-                       cleanList.add(task);
-                    }
-                }
-                runningTasks = cleanList;
-
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (!taskQueueFile.exists()) {
+                taskQueueFile.createNewFile();
             }
 
-            if (Thread.interrupted()) {
+            if (!finishedFile.exists()) {
+                finishedFile.createNewFile();
+            }
+
+
+            logger.trace("Import new invocations");
+
+            //Add new Tasks
+            String writeBuffer = "";
+            for (String line : FileUtils.readLines(taskQueueFile, "UTF-8")) {
+                String[] parts = line.split(";");
+                Task currentTask = tasks.getTask(Integer.parseInt(parts[0]));
+                currentTask.setUUID(parts[1]);
+
+                if (isEnoughCPUavailable(currentTask)) {
+
+                    //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
+                    //actual CPU = normal CP/cores
+                    Double actualCPU = currentTask.getCpu()/Runtime.getRuntime().availableProcessors();
+                    currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
+                    currentTask.setActualCPU(getNormalDistribution(actualCPU));
+
+                    runningTasks.add(currentTask);
+                } else {
+                    writeBuffer+=line + "\n";
+                }
+            }
+
+            FileUtils.writeStringToFile(taskQueueFile, writeBuffer);
+
+
+            logger.trace("Invoke lookbusy: " + " lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());
+            Process p = Runtime.getRuntime().exec(" lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  Runtime.getRuntime().availableProcessors());
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
                 return;
             }
 
+            p.destroy();
+
+            logger.trace("Cleanup runningList");
+            List<Task> cleanList = new ArrayList<>();
+            for (Task task : runningTasks) {
+                if (task.getTimeLeft()-5<0) {
+                    FileUtils.writeStringToFile(finishedFile, task.getUUID() + "\n", true);
+                } else {
+                    task.setTimeLeft(task.getTimeLeft()-5);
+                    cleanList.add(task);
+                }
+            }
+            runningTasks = cleanList;
+
+            data.put("tasks", runningTasks);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-
-
-
     }
 
 
@@ -140,4 +137,5 @@ public class Calculator implements Runnable {
             }
         }
     }
+
 }

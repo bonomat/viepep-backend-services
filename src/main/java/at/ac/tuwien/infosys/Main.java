@@ -5,7 +5,6 @@ import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.NetworkListener;
 
 import java.io.IOException;
 
@@ -23,17 +22,12 @@ public class Main {
     
     public static void main(String[] args) throws IOException {
 
-        Calculator calculator = new Calculator();
-        Thread calcThread = new Thread(calculator);
-        calcThread.start();
-
 
         HttpServer httpServer = startServer();
-        System.out.println(String.format("Jersey app started with WADL available at "
+        System.out.println(String.format("Server is available on http://localhost/service/[1-10] "
                 + "%sapplication.wadl\nHit enter to stop it...",
                 "http://localhost:8080"));
        // System.in.read();
        // httpServer.stop();
-       // calcThread.interrupt();
-    }    
+    }
 }

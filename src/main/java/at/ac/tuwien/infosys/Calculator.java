@@ -20,9 +20,10 @@ public class Calculator implements Job {
     private static final Logger logger = LogManager.getLogger(Calculator.class.getName());
     private Tasks tasks;
     private List<Task> runningTasks = new ArrayList<>();
+    private List<Task> finishedTasks = new ArrayList<>();
 
     //TODO determine typical baseload
-    private Double baseload = 10.0;
+    private Double baseload = 5.0;
     private Double lowerBound = 0.7;
     private Double upperBound = 1.5;
 
@@ -36,7 +37,6 @@ public class Calculator implements Job {
             runningTasks = (ArrayList<Task>) data.get("tasks");
         }
 
-        //String favoriteColor = data.getString(FAVORITE_COLOR);
 
 
         logger.trace("Start calculator");
@@ -45,18 +45,23 @@ public class Calculator implements Job {
             File taskQueueFile = new File(directoryPath + "taskqueue.txt");
             File finishedFile = new File(directoryPath + "finished.txt");
 
-            if (!taskQueueFile.exists()) {
-                taskQueueFile.createNewFile();
-            }
+            createFilesWhenTheyAreInexistant(taskQueueFile, finishedFile);
 
-            if (!finishedFile.exists()) {
-                finishedFile.createNewFile();
-            }
 
+            logger.trace("Cleanup runningList");
+            List<Task> cleanList = new ArrayList<>();
+            for (Task task : runningTasks) {
+                if (task.getTimeLeft()-5<0) {
+                    finishedTasks.add(task);
+                } else {
+                    task.setTimeLeft(task.getTimeLeft()-5);
+                    cleanList.add(task);
+                }
+            }
+            runningTasks = cleanList;
 
             logger.trace("Import new invocations");
 
-            //Add new Tasks
             String writeBuffer = "";
             for (String line : FileUtils.readLines(taskQueueFile, "UTF-8")) {
                 String[] parts = line.split(";");
@@ -77,8 +82,9 @@ public class Calculator implements Job {
                 }
             }
 
-            FileUtils.writeStringToFile(taskQueueFile, writeBuffer);
+            data.put("tasks", runningTasks);
 
+            FileUtils.writeStringToFile(taskQueueFile, writeBuffer);
 
             logger.trace("Invoke lookbusy: " + " lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());
             Process p = Runtime.getRuntime().exec(" lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  Runtime.getRuntime().availableProcessors());
@@ -88,21 +94,21 @@ public class Calculator implements Job {
                 return;
             }
 
+            logger.trace("\"Inform\" web-services that they are finished.");
+
+            for (Task task: finishedTasks) {
+                FileUtils.writeStringToFile(finishedFile, task.getUUID() + "\n", true);
+            }
+
+            //Interleaving period to smooth the startup of the next lookbusy iteration
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                return;
+            }
+
             p.destroy();
 
-            logger.trace("Cleanup runningList");
-            List<Task> cleanList = new ArrayList<>();
-            for (Task task : runningTasks) {
-                if (task.getTimeLeft()-5<0) {
-                    FileUtils.writeStringToFile(finishedFile, task.getUUID() + "\n", true);
-                } else {
-                    task.setTimeLeft(task.getTimeLeft()-5);
-                    cleanList.add(task);
-                }
-            }
-            runningTasks = cleanList;
-
-            data.put("tasks", runningTasks);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -111,14 +117,12 @@ public class Calculator implements Job {
 
 
     private Boolean isEnoughCPUavailable(Task task) {
-        //TODO respect multiple cores
         //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
         if ((calculateOverallCPU() + (task.getCpu()/Runtime.getRuntime().availableProcessors()))>100) {
             return false;
         }
         return true;
     }
-
 
     private Double calculateOverallCPU() {
         Double overallCPU = baseload;
@@ -135,6 +139,16 @@ public class Calculator implements Job {
             if ((result>(cpu*lowerBound)) && (result<(cpu*upperBound))) {
                 return result;
             }
+        }
+    }
+
+    private void createFilesWhenTheyAreInexistant(File taskQueueFile, File finishedFile) throws IOException {
+        if (!taskQueueFile.exists()) {
+            taskQueueFile.createNewFile();
+        }
+
+        if (!finishedFile.exists()) {
+            finishedFile.createNewFile();
         }
     }
 

@@ -38,9 +38,6 @@ public class Service {
         Integer possibleIterations = 0;
         Boolean finished = false;
 
-
-        //TODO add countdown for while loop
-
         while ((possibleIterations<300) && (!finished)) {
             File finishedFile = new File(directoryPath + "finished.txt");
             if (!finishedFile.exists()) {

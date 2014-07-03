@@ -71,10 +71,9 @@ public class Calculator implements Job {
                 //more than 3 CPU
                 if (Runtime.getRuntime().availableProcessors() > 2) {
                     if (isEnoughCPUavailable(currentTask)) {
-                        //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
                         //actual CPU = normal CP/cores
                         Double actualCPU = currentTask.getCpu()/Runtime.getRuntime().availableProcessors();
-                        currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
+                        currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()/durationSpeedup()));
                         currentTask.setActualCPU(getNormalDistribution(actualCPU));
 
                         runningTasks.add(currentTask);
@@ -84,10 +83,9 @@ public class Calculator implements Job {
                 } else {
                     if (Runtime.getRuntime().availableProcessors() > 1) {
                         if (isEnoughCPUavailableForLessThanThreeCores(currentTask)) {
-                            //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
                             //actual CPU = normal CP/cores
                             Double actualCPU = currentTask.getCpu()/(Runtime.getRuntime().availableProcessors()*2);
-                            currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()*2));
+                            currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()/durationSpeedup()*2));
                             currentTask.setActualCPU(getNormalDistribution(actualCPU));
 
                             runningTasks.add(currentTask);
@@ -96,7 +94,6 @@ public class Calculator implements Job {
                         }
                     } else {
                         if (isEnoughCPUavailableForLessThanThreeCores(currentTask)) {
-                            //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
                             //actual CPU = normal CP/cores
                             Double actualCPU = currentTask.getCpu()/(Runtime.getRuntime().availableProcessors()*4);
                             currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()*4));
@@ -108,12 +105,6 @@ public class Calculator implements Job {
                         }
                     }
                 }
-
-
-
-
-
-
 
             }
 
@@ -152,8 +143,6 @@ public class Calculator implements Job {
 
 
     private Boolean isEnoughCPUavailable(Task task) {
-        //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
-
         if ((calculateOverallCPU() + (task.getCpu()/Runtime.getRuntime().availableProcessors()))>100) {
             return false;
         }
@@ -161,8 +150,6 @@ public class Calculator implements Job {
     }
 
     private Boolean isEnoughCPUavailableForLessThanThreeCores(Task task) {
-        //TODO implement https://en.wikipedia.org/wiki/Gustafson%27s_law
-
         if ((calculateOverallCPU() + (task.getCpu()/4))>100) {
             return false;
         }
@@ -199,4 +186,15 @@ public class Calculator implements Job {
         }
     }
 
+    private Double durationSpeedup() {
+        //based on Gustavonsons Law
+
+        return (1 - 0.7) + Runtime.getRuntime().availableProcessors() * 0.7;
+
+    }
+
+
+
 }
+
+

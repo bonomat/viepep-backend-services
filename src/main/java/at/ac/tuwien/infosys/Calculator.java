@@ -24,8 +24,8 @@ public class Calculator implements Job {
 
     //TODO determine typical baseload
     private Double baseload = 5.0;
-    private Double lowerBound = 0.7;
-    private Double upperBound = 1.5;
+    private Double lowerBound = 0.9;
+    private Double upperBound = 1.3;
 
 
     @Override
@@ -68,42 +68,14 @@ public class Calculator implements Job {
                 Task currentTask = tasks.getTask(Integer.parseInt(parts[0]));
                 currentTask.setUUID(parts[1]);
 
-                //more than 3 CPU
-                if (Runtime.getRuntime().availableProcessors() > 2) {
-                    if (isEnoughCPUavailable(currentTask)) {
-                        //actual CPU = normal CP/cores
-                        Double actualCPU = currentTask.getCpu()/Runtime.getRuntime().availableProcessors();
-                        currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()/durationSpeedup()));
-                        currentTask.setActualCPU(getNormalDistribution(actualCPU));
+                if (isEnoughCPUavailable(currentTask)) {
+                    currentTask.setActualCPU(getNormalDistribution(currentTask.getCpu()/Runtime.getRuntime().availableProcessors()));
+                    currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
+                    currentTask.setActualCPU(getNormalDistribution(currentTask.getCpu()));
 
-                        runningTasks.add(currentTask);
-                    } else {
-                        writeBuffer+=line + "\n";
-                    }
+                    runningTasks.add(currentTask);
                 } else {
-                    if (Runtime.getRuntime().availableProcessors() > 1) {
-                        if (isEnoughCPUavailableForLessThanThreeCores(currentTask)) {
-                            //actual CPU = normal CP/cores
-                            Double actualCPU = currentTask.getCpu()/(Runtime.getRuntime().availableProcessors()*2);
-                            currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()/durationSpeedup()*2));
-                            currentTask.setActualCPU(getNormalDistribution(actualCPU));
-
-                            runningTasks.add(currentTask);
-                        } else {
-                            writeBuffer+=line + "\n";
-                        }
-                    } else {
-                        if (isEnoughCPUavailableForLessThanThreeCores(currentTask)) {
-                            //actual CPU = normal CP/cores
-                            Double actualCPU = currentTask.getCpu()/(Runtime.getRuntime().availableProcessors()*4);
-                            currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()*4));
-                            currentTask.setActualCPU(getNormalDistribution(actualCPU));
-
-                            runningTasks.add(currentTask);
-                        } else {
-                            writeBuffer+=line + "\n";
-                        }
-                    }
+                    writeBuffer+=line + "\n";
                 }
 
             }
@@ -144,18 +116,11 @@ public class Calculator implements Job {
 
     private Boolean isEnoughCPUavailable(Task task) {
         if ((calculateOverallCPU() + (task.getCpu()/Runtime.getRuntime().availableProcessors()))>100) {
+        //if ((calculateOverallCPU() + (task.getCpu()))>100) {
             return false;
         }
         return true;
     }
-
-    private Boolean isEnoughCPUavailableForLessThanThreeCores(Task task) {
-        if ((calculateOverallCPU() + (task.getCpu()/4))>100) {
-            return false;
-        }
-        return true;
-    }
-
 
 
     private Double calculateOverallCPU() {

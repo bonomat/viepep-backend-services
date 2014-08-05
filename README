@@ -1,5 +1,5 @@
 # Usage
-<IP>/service/[1-10]
+<IP>/task/[1-10]
 
 
 # To install:
@@ -17,29 +17,7 @@ sudo make install
 git clone https://chhochreiner@bitbucket.org/chhochreiner/viepepevaluation.git
 
 # compile viepepevaluation
-cd viepepevaluation
 mvn install
 
-# setup upstart script
-vim /etc/init/viepep.conf
-
------
-
-description "viepepeval"
-
-start on startup
-
-expect fork
-
-respawn
-
-script
-
-chdir /home/ubuntu/viepepevaluation/
-exec mvn exec:java
-
-end script
-
------
-
+# deploy viepepevaluation on a tomcat server
 

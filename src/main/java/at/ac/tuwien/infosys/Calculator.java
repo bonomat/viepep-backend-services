@@ -16,6 +16,7 @@ import java.util.List;
 @DisallowConcurrentExecution
 public class Calculator implements Job {
 
+    //TODO adopt to system environment --> it is suggested to use the user's home folder as basefolder e.g. /home/ubuntu/
     private String directoryPath = "";
     private static final Logger logger = LogManager.getLogger(Calculator.class.getName());
     private Tasks tasks;

@@ -17,6 +17,7 @@ import java.util.UUID;
 @Path("/{task}")
 public class Service {
 
+    //TODO adopt to system environment --> it is suggested to use the user's home folder as basefolder e.g. /home/ubuntu/
     private String directoryPath = "";
     static final Logger logger = LogManager.getLogger(Service.class.getName());
 

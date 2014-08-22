@@ -24,7 +24,7 @@ public class Calculator implements Job {
     private List<Task> finishedTasks = new ArrayList<>();
 
     //TODO determine typical baseload
-    private Double baseload = 5.0;
+    private Double baseload = 0.0;
     private Double lowerBound = 0.9;
     private Double upperBound = 1.3;
 

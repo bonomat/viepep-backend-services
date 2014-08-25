@@ -90,7 +90,7 @@ public class Calculator implements Job {
                     "Waiting processes: " + "\n" + writeBuffer );
 
             logger.trace("Invoke lookbusy: " + " /usr/local/bin/lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());
-            Process p = Runtime.getRuntime().exec(" lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  availableProcessors);
+            Process p = Runtime.getRuntime().exec(" /usr/local/bin/lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  availableProcessors);
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {

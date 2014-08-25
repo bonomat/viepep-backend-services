@@ -17,11 +17,12 @@ import java.util.List;
 public class Calculator implements Job {
 
     //TODO adopt to system environment --> it is suggested to use the user's home folder as basefolder e.g. /home/ubuntu/
-    private String directoryPath = "";
+    private String directoryPath = "/home/ubuntu/";
     private static final Logger logger = LogManager.getLogger(Calculator.class.getName());
     private Tasks tasks;
     private List<Task> runningTasks = new ArrayList<>();
     private List<Task> finishedTasks = new ArrayList<>();
+    private Integer availableProcessors = 0;
 
     //TODO determine typical baseload
     private Double baseload = 0.0;
@@ -38,7 +39,7 @@ public class Calculator implements Job {
             runningTasks = (ArrayList<Task>) data.get("tasks");
         }
 
-
+        availableProcessors =  Runtime.getRuntime().availableProcessors();
 
         logger.trace("Start calculator");
 
@@ -70,23 +71,26 @@ public class Calculator implements Job {
                 currentTask.setUUID(parts[1]);
 
                 if (isEnoughCPUavailable(currentTask)) {
-                    currentTask.setActualCPU(getNormalDistribution(currentTask.getCpu()/Runtime.getRuntime().availableProcessors()));
+                    currentTask.setActualCPU(getNormalDistribution(currentTask.getCpu() / availableProcessors));
                     currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
-                    currentTask.setActualCPU(getNormalDistribution(currentTask.getCpu()));
 
                     runningTasks.add(currentTask);
                 } else {
                     writeBuffer+=line + "\n";
                 }
-
             }
 
             data.put("tasks", runningTasks);
 
             FileUtils.writeStringToFile(taskQueueFile, writeBuffer);
 
+            logger.trace("Available resources: " + availableProcessors*100 + "\n" +
+                    "Running processes: " + runningTasks.size() + "\n" +
+                    "Used power: " + calculateOverallCPU()*availableProcessors + "\n" +
+                    "Waiting processes: " + "\n" + writeBuffer );
+
             logger.trace("Invoke lookbusy: " + " lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());
-            Process p = Runtime.getRuntime().exec(" lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  Runtime.getRuntime().availableProcessors());
+            Process p = Runtime.getRuntime().exec(" lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  availableProcessors);
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
@@ -116,8 +120,7 @@ public class Calculator implements Job {
 
 
     private Boolean isEnoughCPUavailable(Task task) {
-        if ((calculateOverallCPU() + (task.getCpu()/Runtime.getRuntime().availableProcessors()))>100) {
-        //if ((calculateOverallCPU() + (task.getCpu()))>100) {
+        if ((calculateOverallCPU() + (task.getCpu()/availableProcessors))>100) {
             return false;
         }
         return true;
@@ -155,7 +158,7 @@ public class Calculator implements Job {
     private Double durationSpeedup() {
         //based on Gustavonsons Law
 
-        return (1 - 0.7) + Runtime.getRuntime().availableProcessors() * 0.7;
+        return (1 - 0.7) + availableProcessors * 0.7;
 
     }
 

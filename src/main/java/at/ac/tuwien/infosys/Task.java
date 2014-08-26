@@ -10,6 +10,7 @@ public class Task implements Serializable {
     private Double timeLeft;
     private Double actualCPU;
     private String UUID;
+    private String id;
 
     public Task(Double cpu, Double duration) {
         this.cpu = cpu;
@@ -54,5 +55,13 @@ public class Task implements Serializable {
 
     public void setUUID(String UUID) {
         this.UUID = UUID;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

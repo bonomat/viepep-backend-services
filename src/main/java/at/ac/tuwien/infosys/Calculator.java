@@ -18,6 +18,7 @@ public class Calculator implements Job {
 
     //TODO adopt to system environment --> it is suggested to use the user's home folder as basefolder e.g. /home/ubuntu/
     private String directoryPath = "/home/ubuntu/";
+    //private String directoryPath = "";
     private static final Logger logger = LogManager.getLogger(Calculator.class.getName());
     private Tasks tasks;
     private List<Task> runningTasks = new ArrayList<>();
@@ -73,7 +74,7 @@ public class Calculator implements Job {
                 if (isEnoughCPUavailable(currentTask)) {
                     currentTask.setActualCPU(getNormalDistribution(currentTask.getCpu() / availableProcessors));
                     currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
-
+                    currentTask.setId(parts[0]);
                     runningTasks.add(currentTask);
                 } else {
                     writeBuffer+=line + "\n";
@@ -84,9 +85,16 @@ public class Calculator implements Job {
 
             FileUtils.writeStringToFile(taskQueueFile, writeBuffer);
 
+
+            String runningProcesses = "";
+            for (Task task: runningTasks) {
+                runningProcesses+= "typ: " + task.getId() + ";cpu:" + task.getActualCPU()*availableProcessors + ";remainingTime:" + task.getTimeLeft() + "\n";
+            }
+
             logger.trace("Available resources: " + availableProcessors*100 + "\n" +
                     "Running processes: " + runningTasks.size() + "\n" +
                     "Used power: " + calculateOverallCPU()*availableProcessors + "\n" +
+                    "Running processes:" + "\n" + runningProcesses + "\n" +
                     "Waiting processes: " + "\n" + writeBuffer );
 
             logger.trace("Invoke lookbusy: " + " /usr/local/bin/lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());

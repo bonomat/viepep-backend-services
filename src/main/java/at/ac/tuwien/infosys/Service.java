@@ -36,7 +36,7 @@ public class Service {
         UUID taskId = UUID.randomUUID();
 
         String normalDistribution = "normal";
-        if (plainModifier.equals("plain")) {
+        if ("plain".equals(plainModifier)) {
             normalDistribution = "plain";
         }
         FileUtils.writeStringToFile(taskQueueFile, task + ";" + taskId + ";" + normalDistribution +  "\n", true);

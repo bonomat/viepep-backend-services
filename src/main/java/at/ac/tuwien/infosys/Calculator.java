@@ -27,8 +27,8 @@ public class Calculator implements Job {
 
     //TODO determine typical baseload
     private Double baseload = 0.0;
-    private Double lowerBound = 0.9;
-    private Double upperBound = 1.3;
+    private Double lowerBound = 0.95;
+    private Double upperBound = 1.05;
 
 
     @Override

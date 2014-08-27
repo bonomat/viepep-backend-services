@@ -72,8 +72,13 @@ public class Calculator implements Job {
                 currentTask.setUUID(parts[1]);
 
                 if (isEnoughCPUavailable(currentTask)) {
-                    currentTask.setActualCPU(getNormalDistribution(currentTask.getCpu() / availableProcessors));
-                    currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
+                    if (parts[2].equals("plain")) {
+                        currentTask.setActualCPU(currentTask.getCpu() / availableProcessors);
+                        currentTask.setTimeLeft(currentTask.getDuration());
+                    } else {
+                        currentTask.setActualCPU(getNormalDistribution(currentTask.getCpu() / availableProcessors));
+                        currentTask.setTimeLeft(getNormalDistribution(currentTask.getDuration()));
+                    }
                     currentTask.setId(parts[0]);
                     runningTasks.add(currentTask);
                 } else {

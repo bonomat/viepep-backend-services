@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
-@Path("/{task}")
+@Path("/{task}/{normal}")
 public class Service {
 
     //TODO adopt to system environment --> it is suggested to use the user's home folder as basefolder e.g. /home/ubuntu/
@@ -22,9 +22,11 @@ public class Service {
     //private String directoryPath = "";
     static final Logger logger = LogManager.getLogger(Service.class.getName());
 
+
+    //plain --> non normal distribution; default is normal distribution
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public String invokeService(@PathParam("task") int task) throws IOException, InterruptedException {
+    public String invokeService(@PathParam("task") int task, @PathParam("normal") String plainModifier) throws IOException, InterruptedException {
 
         //TODO add filelock
         File taskQueueFile = new File(directoryPath + "taskqueue.txt");
@@ -33,7 +35,11 @@ public class Service {
         }
         UUID taskId = UUID.randomUUID();
 
-        FileUtils.writeStringToFile(taskQueueFile, task + ";" + taskId + "\n", true);
+        String normalDistribution = "normal";
+        if (plainModifier.equals("plain")) {
+            normalDistribution = "plain";
+        }
+        FileUtils.writeStringToFile(taskQueueFile, task + ";" + taskId + ";" + normalDistribution +  "\n", true);
         logger.trace("Trigger new Task " + task + " with ID " + taskId);
 
 

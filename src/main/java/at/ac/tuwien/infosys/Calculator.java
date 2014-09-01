@@ -17,8 +17,8 @@ import java.util.List;
 public class Calculator implements Job {
 
     //TODO adopt to system environment --> it is suggested to use the user's home folder as basefolder e.g. /home/ubuntu/
-    private String directoryPath = "/home/ubuntu/";
-    //private String directoryPath = "";
+    //private String directoryPath = "/home/ubuntu/";
+    private String directoryPath = "";
     private static final Logger logger = LogManager.getLogger(Calculator.class.getName());
     private Tasks tasks;
     private List<Task> runningTasks = new ArrayList<>();
@@ -70,7 +70,11 @@ public class Calculator implements Job {
                 String[] parts = line.split(";");
                 Task currentTask = tasks.getTask(Integer.parseInt(parts[0]));
                 currentTask.setUUID(parts[1]);
-
+                if ("data".equals(parts[3])) {
+                    currentTask.setDataSimulation(true);
+                } else {
+                    currentTask.setDataSimulation(false);
+                }
                 if (isEnoughCPUavailable(currentTask)) {
                     if (parts[2].equals("plain")) {
                         currentTask.setActualCPU(currentTask.getCpu() / availableProcessors);
@@ -103,7 +107,7 @@ public class Calculator implements Job {
                     "Waiting processes: " + "\n" + writeBuffer );
 
             logger.trace("Invoke lookbusy: " + " /usr/local/bin/lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());
-            Process p = Runtime.getRuntime().exec(" /usr/local/bin/lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  availableProcessors);
+            //Process p = Runtime.getRuntime().exec(" /usr/local/bin/lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  availableProcessors);
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
@@ -113,7 +117,12 @@ public class Calculator implements Job {
             logger.trace("\"Inform\" web-services that they are finished.");
 
             for (Task task: finishedTasks) {
-                FileUtils.writeStringToFile(finishedFile, task.getUUID() + "\n", true);
+                if (task.getDataSimulation()) {
+                    FileUtils.writeStringToFile(finishedFile, task.getUUID() + ";" + task.getDataSize()  + "\n", true);
+                } else {
+                    FileUtils.writeStringToFile(finishedFile, task.getUUID() + ";0"  + "\n", true);
+                }
+
             }
 
             //Interleaving period to smooth the startup of the next lookbusy iteration
@@ -123,7 +132,7 @@ public class Calculator implements Job {
                 return;
             }
 
-            p.destroy();
+            //p.destroy();
 
 
         } catch (IOException e) {

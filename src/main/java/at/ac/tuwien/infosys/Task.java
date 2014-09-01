@@ -11,10 +11,14 @@ public class Task implements Serializable {
     private Double actualCPU;
     private String UUID;
     private String id;
+    private Boolean dataSimulation;
+    private Integer dataSize;
 
-    public Task(Double cpu, Double duration) {
+    public Task(Double cpu, Double duration, Integer dataSize) {
         this.cpu = cpu;
         this.duration = duration;
+        this.dataSize = dataSize;
+
     }
 
     public Double getCpu() {
@@ -64,4 +68,21 @@ public class Task implements Serializable {
     public void setId(String id) {
         this.id = id;
     }
+
+    public Boolean getDataSimulation() {
+        return dataSimulation;
+    }
+
+    public void setDataSimulation(Boolean dataSimulation) {
+        this.dataSimulation = dataSimulation;
+    }
+
+    public Integer getDataSize() {
+        return dataSize;
+    }
+
+    public void setDataSize(Integer dataSize) {
+        this.dataSize = dataSize;
+    }
+
 }

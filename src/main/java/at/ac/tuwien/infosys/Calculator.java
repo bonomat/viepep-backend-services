@@ -17,8 +17,8 @@ import java.util.List;
 public class Calculator implements Job {
 
     //TODO adopt to system environment --> it is suggested to use the user's home folder as basefolder e.g. /home/ubuntu/
-    //private String directoryPath = "/home/ubuntu/";
-    private String directoryPath = "";
+    private String directoryPath = "/home/ubuntu/";
+    //private String directoryPath = "";
     private static final Logger logger = LogManager.getLogger(Calculator.class.getName());
     private Tasks tasks;
     private List<Task> runningTasks = new ArrayList<>();
@@ -107,7 +107,7 @@ public class Calculator implements Job {
                     "Waiting processes: " + "\n" + writeBuffer );
 
             logger.trace("Invoke lookbusy: " + " /usr/local/bin/lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());
-            //Process p = Runtime.getRuntime().exec(" /usr/local/bin/lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  availableProcessors);
+            Process p = Runtime.getRuntime().exec(" /usr/local/bin/lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  availableProcessors);
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
@@ -132,7 +132,7 @@ public class Calculator implements Job {
                 return;
             }
 
-            //p.destroy();
+            p.destroy();
 
 
         } catch (IOException e) {

@@ -17,7 +17,7 @@ import java.util.List;
 public class Calculator implements Job {
 
     //TODO adopt to system environment --> it is suggested to use the user's home folder as basefolder e.g. /home/ubuntu/
-    private String directoryPath = "/home/ubuntu/";
+    private String directoryPath = FileUtils.getTempDirectoryPath();
     //private String directoryPath = "";
     private static final Logger logger = LogManager.getLogger(Calculator.class.getName());
     private Tasks tasks;
@@ -36,17 +36,19 @@ public class Calculator implements Job {
         tasks = new Tasks();
 
         JobDataMap data = jobExecutionContext.getJobDetail().getJobDataMap();
-        if (data.get("tasks")!=null) {
+        if (data.get("tasks") != null) {
             runningTasks = (ArrayList<Task>) data.get("tasks");
         }
 
-        availableProcessors =  Runtime.getRuntime().availableProcessors();
+        availableProcessors = Runtime.getRuntime().availableProcessors();
 
         logger.trace("Start calculator");
 
         try {
             File taskQueueFile = new File(directoryPath + "taskqueue.txt");
+//            File taskQueueFile = File.createTempFile("taskqueue", ".txt");
             File finishedFile = new File(directoryPath + "finished.txt");
+//            File finishedFile = File.createTempFile("finished", ".txt");
 
             createFilesWhenTheyAreInexistant(taskQueueFile, finishedFile);
 
@@ -54,10 +56,10 @@ public class Calculator implements Job {
             logger.trace("Cleanup runningList");
             List<Task> cleanList = new ArrayList<>();
             for (Task task : runningTasks) {
-                if (task.getTimeLeft()-5<0) {
+                if (task.getTimeLeft() - 5 < 0) {
                     finishedTasks.add(task);
                 } else {
-                    task.setTimeLeft(task.getTimeLeft()-5);
+                    task.setTimeLeft(task.getTimeLeft() - 5);
                     cleanList.add(task);
                 }
             }
@@ -86,7 +88,7 @@ public class Calculator implements Job {
                     currentTask.setId(parts[0]);
                     runningTasks.add(currentTask);
                 } else {
-                    writeBuffer+=line + "\n";
+                    writeBuffer += line + "\n";
                 }
             }
 
@@ -96,18 +98,18 @@ public class Calculator implements Job {
 
 
             String runningProcesses = "";
-            for (Task task: runningTasks) {
-                runningProcesses+= "typ: " + task.getId() + ";cpu:" + task.getActualCPU()*availableProcessors + ";remainingTime:" + task.getTimeLeft() + "\n";
+            for (Task task : runningTasks) {
+                runningProcesses += "typ: " + task.getId() + ";cpu:" + task.getActualCPU() * availableProcessors + ";remainingTime:" + task.getTimeLeft() + "\n";
             }
 
-            logger.trace("Available resources: " + availableProcessors*100 + "\n" +
+            logger.trace("Available resources: " + availableProcessors * 100 + "\n" +
                     "Running processes: " + runningTasks.size() + "\n" +
-                    "Used power: " + calculateOverallCPU()*availableProcessors + "\n" +
+                    "Used power: " + calculateOverallCPU() * availableProcessors + "\n" +
                     "Running processes:" + "\n" + runningProcesses + "\n" +
-                    "Waiting processes: " + "\n" + writeBuffer );
+                    "Waiting processes: " + "\n" + writeBuffer);
 
             logger.trace("Invoke lookbusy: " + " /usr/local/bin/lookbusy -c " + calculateOverallCPU() + " -n " + Runtime.getRuntime().availableProcessors());
-            Process p = Runtime.getRuntime().exec(" /usr/local/bin/lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " +  availableProcessors);
+            Process p = Runtime.getRuntime().exec(" /usr/local/bin/lookbusy -c " + Math.round(calculateOverallCPU()) + " -n " + availableProcessors);
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
@@ -116,11 +118,11 @@ public class Calculator implements Job {
 
             logger.trace("\"Inform\" web-services that they are finished.");
 
-            for (Task task: finishedTasks) {
+            for (Task task : finishedTasks) {
                 if (task.getDataSimulation()) {
-                    FileUtils.writeStringToFile(finishedFile, task.getUUID() + ";" + task.getDataSize()  + "\n", true);
+                    FileUtils.writeStringToFile(finishedFile, task.getUUID() + ";" + task.getDataSize() + "\n", true);
                 } else {
-                    FileUtils.writeStringToFile(finishedFile, task.getUUID() + ";0"  + "\n", true);
+                    FileUtils.writeStringToFile(finishedFile, task.getUUID() + ";0" + "\n", true);
                 }
 
             }
@@ -142,7 +144,7 @@ public class Calculator implements Job {
 
 
     private Boolean isEnoughCPUavailable(Task task) {
-        if ((calculateOverallCPU() + (task.getCpu()/availableProcessors))>100) {
+        if ((calculateOverallCPU() + (task.getCpu() / availableProcessors)) > 100) {
             return false;
         }
         return true;
@@ -152,16 +154,16 @@ public class Calculator implements Job {
     private Double calculateOverallCPU() {
         Double overallCPU = baseload;
         for (Task task : runningTasks) {
-            overallCPU+=task.getActualCPU();
+            overallCPU += task.getActualCPU();
         }
         return overallCPU;
     }
 
     private Double getNormalDistribution(Double cpu) {
         while (true) {
-            NormalDistribution n = new NormalDistribution(cpu, cpu/10);
+            NormalDistribution n = new NormalDistribution(cpu, cpu / 10);
             Double result = Math.abs(n.sample());
-            if ((result>(cpu*lowerBound)) && (result<(cpu*upperBound))) {
+            if ((result > (cpu * lowerBound)) && (result < (cpu * upperBound))) {
                 return result;
             }
         }
@@ -183,8 +185,6 @@ public class Calculator implements Job {
         return (1 - 0.7) + availableProcessors * 0.7;
 
     }
-
-
 
 }
 

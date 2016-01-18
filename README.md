@@ -22,7 +22,8 @@ mvn install
 ## deploy viepepevaluation on a tomcat server
 
 # To install using a docker container
+## Build docker container
 docker build -t <repo-name> .
 
-# Run the container
+## Run the container
 docker run -it --rm -p 8080:8080 <repo-name>

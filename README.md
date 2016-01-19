@@ -32,8 +32,10 @@ git clone https://github.com/bonomat/viepep-backend-services
 mvn install
 ```
 
-## deploy target/service.war on a tomcat server
-
+## deploy 
+```
+target/service.war on a tomcat server
+```
 
 # To install using a docker container
 ## Build docker container

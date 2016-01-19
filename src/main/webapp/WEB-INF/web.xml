@@ -8,7 +8,7 @@
          id="WebApp_ID" version="2.5">
 
     <servlet>
-        <description>viepep evaluation task</description>
+        <description>evaluation task</description>
         <display-name>task</display-name>
         <servlet-name>task</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
